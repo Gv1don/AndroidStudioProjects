@@ -9,6 +9,7 @@ import android.widget.TextView
 import net.objecthunter.exp4j.Expression
 import net.objecthunter.exp4j.ExpressionBuilder
 import org.w3c.dom.Text
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity() {
         var bufferStr: String = ""
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val signAfterComma : Byte
         val historyBox = findViewById<TextView>(R.id.history_box)
         val mainBox = findViewById<TextView>(R.id.main_box)
         val btn_0 = findViewById<TextView>(R.id.btn_0)
@@ -68,26 +70,36 @@ class MainActivity : AppCompatActivity() {
         btn_procent.setOnClickListener { AddSymbolInMainBox("%")
             bufferStr += "%"}
         btn_del.setOnClickListener { DeleteSymbol()
-            bufferStr.substring(0, bufferStr.length - 1)}
+            if (bufferStr.length >= 1){
+                bufferStr.substring(0, bufferStr.length - 1)
+            } }
         btn_AC.setOnClickListener { mainBox.setText("")
             historyBox.setText("")
             bufferStr = ""}
-        btn_comma.setOnClickListener { AddSymbolInMainBox(".")
-            bufferStr += "."}
+        btn_comma.setOnClickListener { if (mainBox.text.toString() != ""){
+            AddSymbolInMainBox(".")
+            bufferStr += "."
+        }
+            else{
+            AddSymbolInMainBox("0.")
+            bufferStr += "0."
+        }
+        }
         btn_equal.setOnClickListener {
             try {
                 if (bufferStr != ""){
                     val ex = ExpressionBuilder(bufferStr).build()
                     val result = ex.evaluate()
 
-                    val longRes = result.toLong()
+                    val intRes = result.toInt()
                     val history = mainBox.text.toString() + " ="
 
-                    if (result == longRes.toDouble()){
-                        mainBox.setText(longRes.toString())
+                    if (result == intRes.toDouble()){
+                        mainBox.setText(intRes.toString())
                         historyBox.setText(history)
                     }
                     else{
+                        result.toFloat()
                         mainBox.setText(result.toString())
                         historyBox.setText(history)
                     }
@@ -101,8 +113,10 @@ class MainActivity : AppCompatActivity() {
 
     fun DeleteSymbol(){
         val mainBox = findViewById<TextView>(R.id.main_box)
-        var strMainBox = mainBox.text
-        mainBox.setText(strMainBox.substring(0, strMainBox.length - 1))
+        if (mainBox.text.toString() != ""){
+            var strMainBox = mainBox.text
+            mainBox.setText(strMainBox.substring(0, strMainBox.length - 1))
+        }
     }
 
     fun AddSymbolInMainBox(symbol: String) {
